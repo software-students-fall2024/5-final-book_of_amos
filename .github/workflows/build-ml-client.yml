@@ -1,0 +1,37 @@
+name: ML Client Build
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_test_ml_client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build machine learning client Docker container
+        working-directory: machine-learning-client
+        run: |
+          docker build -t ml-client:latest .
+
+      - name: Run tests in machine learning client Docker container
+        run: |
+          docker run --rm ml-client pytest /app/test_client.py --verbose
+
+      - name: Cleanup Docker images
+        run: |
+          docker rmi ml-client:latest

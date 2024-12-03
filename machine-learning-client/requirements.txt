@@ -1,0 +1,14 @@
+tensorflow>=2.16.0
+opencv-python-headless==4.5.5.64 
+numpy==1.23.5
+Flask==2.1.2
+Werkzeug==2.1.2
+pylint
+black  
+pipenv 
+pymongo
+inference-sdk
+pytest
+pytest-cov
+
+

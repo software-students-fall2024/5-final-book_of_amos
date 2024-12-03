@@ -1,0 +1,40 @@
+name: lint-free
+on: [push, pull_request]
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        subdir: [web-app, machine-learning-client]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install TensorFlow
+        if: ${{ matrix.subdir == 'machine-learning-client' }}
+        run: |
+          cd ${{ matrix.subdir }}
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir tensorflow-cpu>=2.16.0
+
+      - name: Install Other Dependencies
+        run: |
+          cd ${{ matrix.subdir }}
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Lint with pylint
+        if: ${{ hashFiles(format('{0}/**/*.py', matrix.subdir)) != '' }}
+        run: |
+          cd ${{ matrix.subdir }}
+          pylint **/*.py
+
+      - name: Format with black
+        if: ${{ hashFiles(format('{0}/**/*.py', matrix.subdir)) != '' }}
+        run: |
+          cd ${{ matrix.subdir }}
+          black --diff --check .
