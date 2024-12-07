@@ -147,9 +147,9 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ choice: playerChoice })
         });
-
+        
         const data = await response.json();
-
+        console.log(data.stats.losses)
         if (data.error) {
             resultContainer.textContent = `Error: ${data.error}`;
             resultContainer.style.color = "red";

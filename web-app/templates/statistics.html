@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Statistics</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 0.8rem;
+            text-align: center;
+        }
+        table th {
+            background-color: #007BFF;
+            color: white;
+        }
+        .chart-container {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.5rem 1rem;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .back-link:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>Game Statistics</header>
+    <main>
+        <h2>Performance Overview</h2>
+        <p>Here’s a summary of how you’ve performed in Rock-Paper-Scissors so far:</p>
+
+        <h3>Overall Stats</h3>
+        <table>
+            <tr>
+                <th>Total Games</th>
+                <th>Wins</th>
+                <th>Losses</th>
+                <th>Ties</th>
+            </tr>
+            <tr>
+                <td id="total-games">0</td>
+                <td id="wins">{{stats_data['totals']['wins']}}</td>
+                <td id="losses">{{stats_data['totals']['losses']}}</td>
+                <td id="ties">{{stats_data['totals']['ties']}}</td>
+            </tr>
+        </table>
+
+        <h3>Gesture Analysis</h3>
+        <table>
+            <tr>
+                <th>Gesture</th>
+                <th>Times Used</th>
+                <th>Win Rate</th>
+            </tr>
+            <tr>
+                <td>Rock</td>
+                <td id="rock-usage">{{stats_data['rock']['total']}}</td>
+                <td id="rock-win-rate">{{
+                    stats_data['rock']['wins']/stats_data['rock']['total'] * 100
+                    if stats_data['rock']['total'] != 0 else 0.0
+                }}%</td>
+            </tr>
+            <tr>
+                <td>Paper</td>
+                <td id="paper-usage">{{stats_data['paper']['total']}}</td>
+                <td id="paper-win-rate">{{
+                    stats_data['paper']['wins']/stats_data['paper']['total'] * 100
+                    if stats_data['paper']['total'] != 0  else 0.0
+                }}%</td>
+            </tr>
+            <tr>
+                <td>Scissors</td>
+                <td id="scissors-usage">{{stats_data['scissors']['total']}}</td>
+                <td id="scissors-win-rate">{{
+                    stats_data['scissors']['wins']/stats_data['scissors']['total'] * 100
+                    if stats_data['scissors']['total'] != 0 else 0.0
+                }}%</td>
+            </tr>
+        </table>
+
+        <div class="chart-container">
+            <h3>Win/Loss/Tie Distribution</h3>
+            <canvas id="gameChart" width="400" height="200"></canvas>
+        </div>
+
+        <a href="/" class="back-link">Back to Home</a>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Placeholder data for the chart (replace with actual data dynamically)
+        const ctx = document.getElementById('gameChart').getContext('2d');
+        stats_data = JSON.parse('{{stats_data | tojson}}')
+
+        console.log("RIGHT HERE", stats_data)
+        const gameChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Wins', 'Losses', 'Ties'],
+                datasets: [{
+                    label: 'Game Outcomes',
+                    data: [stats_data['totals']['wins'], stats_data['totals']['losses'], stats_data['totals']['ties']],
+                    backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => {
+                                const label = tooltipItem.label || '';
+                                const value = tooltipItem.raw || 0;
+                                const total = tooltipItem.dataset.data.reduce((sum, val) => sum + val, 0);
+                                const percentage = ((value / total) * 100).toFixed(2);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+
