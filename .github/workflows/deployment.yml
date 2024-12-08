@@ -3,7 +3,7 @@ name: Deploy to Droplet
 on:
   push:
     branches:
-      - main 
+      - deployment 
 
 jobs:
   deploy:
@@ -16,10 +16,6 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Re-clone repository
-        run: |
-          rm -rf .git
-          git clone https://github.com/yourusername/your-repository.git .src
       - name: Print working directory
         run: pwd
 
@@ -30,7 +26,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
             git pull origin main
-            docker-compose -f docker-compose.yml up -d
+            docker-compose up -d
           EOF
-        working-directory: src
+        working-directory: ./.ssh/5-final-book_of_amos
 
