@@ -28,5 +28,4 @@ jobs:
             git pull origin main
             docker-compose up -d
           EOF
-        working-directory: ./.ssh/5-final-book_of_amos
 
