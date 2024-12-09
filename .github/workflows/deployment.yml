@@ -21,7 +21,7 @@ jobs:
           ls -la
       - name: Deploy to Droplet
         run: |
-          ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
+          ssh -T -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
             cd 5-final-book_of_amos
             git remote set-url origin git@github.com:software-students-fall2024/5-final-book_of_amos.git
             eval "$(ssh-agent -s)"
