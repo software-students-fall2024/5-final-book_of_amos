@@ -28,6 +28,6 @@ jobs:
             ssh-add ./.ssh/deploy
             ssh -T git@github.com 
             git pull origin deployment
-            docker-compose up --build
+            docker-compose up --build &
           EOF
 
