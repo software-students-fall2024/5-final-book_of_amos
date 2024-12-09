@@ -355,7 +355,7 @@
                 }
 
                 // Preload the AI choice video
-                const aiVideoPath = `/static/assets/${data.ai_choice.toLowerCase()} thrown.mp4`;
+                const aiVideoPath = `/static/assets/${data.ai_choice.charAt(0).toUpperCase() + data.ai_choice.slice(1)} thrown.mp4`;
                 preloadedVideo.src = aiVideoPath;
 
                 // Pause the first video when it ends
