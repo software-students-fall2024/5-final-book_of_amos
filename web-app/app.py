@@ -5,6 +5,7 @@ import time
 import random
 import logging
 from threading import Lock
+
 # from uuid import uuid4
 
 import eventlet
@@ -86,8 +87,7 @@ def retry_request(url, files, retries=5, delay=2, timeout=10):
             response.raise_for_status()
             return response
         except RequestException as error:
-            LOGGER.warning("Retry attempt %d failed: %s",
-                           attempt + 1, str(error))
+            LOGGER.warning("Retry attempt %d failed: %s", attempt + 1, str(error))
             if attempt < retries - 1:
                 time.sleep(delay)
             else:
@@ -287,7 +287,10 @@ def handle_submit_choice(data):
 
     if game.get("player1_choice") and game.get("player2_choice"):
         new_result = determine_winner(
-            game["player1_choice"], game["player2_choice"], game["player1_name"], game["player2_name"]
+            game["player1_choice"],
+            game["player2_choice"],
+            game["player1_name"],
+            game["player2_name"],
         )
         SOCKETIO.emit(
             "game_result",
