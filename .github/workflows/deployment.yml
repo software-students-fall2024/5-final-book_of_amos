@@ -16,6 +16,7 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+          ssh-deploy-key: ${{secrets.DEPLOY_PUB}}
 
       - name: Deploy to Droplet
         run: |
