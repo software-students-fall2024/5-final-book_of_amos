@@ -27,6 +27,7 @@ jobs:
             eval "$(ssh-agent -s)"
             ssh-add ../.ssh/deploy
             git pull origin deployment
-            docker-compose up --build
+            docker-compose up --build &
+            exit
           EOF
 
