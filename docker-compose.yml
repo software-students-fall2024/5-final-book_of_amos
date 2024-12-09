@@ -25,6 +25,7 @@ services:
         - web-app
         ports:
         - "80:80"
+        - "443:443"
 
   machine-learning-client:
     build:
