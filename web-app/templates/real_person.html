@@ -3,97 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock Paper scissors - Play Against a Friend</title>
+    <title>Rock Paper Scissors - Play Against a Friend</title>
     <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #ff7eb3, #ff758c, #ff416c);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            background-color: #f9f9f9;
             padding: 20px;
         }
+
         h1 {
-            font-size: 3rem;
-            color: #333;
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
         }
+
         p {
             font-size: 1.2rem;
-            color: #666;
+            margin-bottom: 20px;
         }
+
+        /* Status Container */
+        .status-container {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f8e71c;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        /* Choices */
         .choice-container {
             display: flex;
             justify-content: center;
-            margin-top: 30px;
+            gap: 30px;
+            margin-top: 20px;
         }
+
         .choice {
-            margin: 0 20px;
+            background: linear-gradient(to bottom right, #6a11cb, #2575fc);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 15px;
             cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             text-align: center;
         }
+
+        .choice:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
         .choice img {
-            width: 150px;
-            height: 150px;
-            border: 2px solid transparent;
-            transition: transform 0.3s, border-color 0.3s;
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: transform 0.3s;
         }
-        .choice img:hover {
+
+        .choice:hover img {
             transform: scale(1.1);
-            border-color: #007BFF;
         }
+
+        .choice p {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* Result Container */
         .result-container {
             margin-top: 30px;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            color: #333;
+            color: #ffeb3b;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-        .status-container {
-            font-size: 1.2rem;
-            color: red;
-            margin-top: 20px;
-        }
+
+        /* Buttons */
         .home-button {
             display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
+            margin-top: 30px;
+            padding: 12px 25px;
             font-size: 1.2rem;
+            font-weight: bold;
             color: #fff;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 8px;
+            background: linear-gradient(to right, #42e695, #3bb2b8);
             text-decoration: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            border-radius: 50px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
         .home-button:hover {
-            background-color: #0056b3;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
         }
+
         .disabled {
             pointer-events: none;
-            opacity: 0.5;
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
-    <a href="/" class="home-button">Return Home</a>
-    <h1>Rock Paper scissors - Play Against a Friend</h1>
+    <!-- Header -->
+    <h1>Rock Paper Scissors - Play Against a Friend</h1>
     <p id="status" class="status-container">Connecting to the game...</p>
 
+    <!-- Choice Container -->
     <div class="choice-container disabled" id="choiceContainer">
         <div class="choice" onclick="makeChoice('rock')">
-            <img src="/static/images/rock.jpg" alt="Rock">
+            <img src="/static/assets/rock icon bg.png" alt="Rock">
             <p>Rock</p>
         </div>
         <div class="choice" onclick="makeChoice('paper')">
-            <img src="/static/images/paper.jpg" alt="Paper">
+            <img src="/static/assets/paper icon bg.png" alt="Paper">
             <p>Paper</p>
         </div>
         <div class="choice" onclick="makeChoice('scissors')">
-            <img src="/static/images/scissors.jpg" alt="scissors">
-            <p>scissors</p>
+            <img src="/static/assets/scissors icon bg.png" alt="Scissors">
+            <p>Scissors</p>
         </div>
     </div>
 
+    <!-- Result Section -->
     <div class="result-container" id="result"></div>
 
+    <!-- Home Button -->
+    <a href="/" class="home-button">Return Home</a>
+
+    <!-- Socket.IO Script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.min.js"></script>
     <script>
         const socket = io();

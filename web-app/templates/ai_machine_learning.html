@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock Paper scissors - Camera Play</title>
+    <title>Rock Paper Scissors - Camera Play</title>
     <style>
+        /* General Reset */
         * {
             margin: 0;
             padding: 0;
@@ -13,126 +14,194 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
-            background-color: #f9f9f9;
+            background: linear-gradient(to bottom right, #1e3c72, #2a5298);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         h1 {
-            margin: 20px 0;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #f9d835;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
         }
 
+        /* Container */
         #container {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 20px;
+            gap: 15px;
             margin-top: 20px;
         }
 
         .window {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 2px solid #333;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
             padding: 10px;
-            width: 500px;
-            height: 550px;
-            background-color: #fff;
-        }
-
-        #video,
-        #ai-window {
-            width: 100%;
-            height: 400px;
-            border: 5px solid #333;
-            border-radius: 10px;
+            width: 350px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
         }
 
         .title {
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 10px;
+            color: #f9d835;
         }
 
-        #gesturePrediction,
+        #video,
+        #ai-window {
+            width: 100%;
+            height: 300px; /* Reduced from 400px */
+            border: 5px solid #f9d835;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+        }
+
+        /* Buttons */
+        .btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #startCountdown {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+        }
+
+        #startCountdown:hover {
+            background: linear-gradient(to right, #e23e57, #d63333);
+            transform: translateY(-3px);
+        }
+
+        #replay {
+            background: linear-gradient(to right, #28a745, #1e7e34);
+        }
+
+        #replay:hover {
+            background: linear-gradient(to right, #1e7e34, #146b25);
+            transform: translateY(-3px);
+        }
+
+        #returnHome {
+            background: linear-gradient(to right, #ff6f61, #e55548);
+        }
+
+        #returnHome:hover {
+            background: linear-gradient(to right, #e55548, #cc4a3d);
+            transform: translateY(-3px);
+        }
+
+        a.home-btn {
+            text-decoration: none;
+            background: linear-gradient(to right, #42e695, #3bb2b8);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        a.home-btn:hover {
+            background: linear-gradient(to right, #36d687, #34a4a7);
+            transform: translateY(-3px);
+        }
+
+        /* Results and Countdown */
         #result,
         #countdown {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            font-weight: bold;
             margin-top: 10px;
-            color: #555;
+            color: #f9d835;
+        }
+
+        #result-container {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
         }
 
         .hidden {
             display: none;
         }
 
-        .btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: #fff;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .side-image {
+            position: fixed;
+            top: 0;
+            height: 100vh; /* Full viewport height */
+            max-width: 20vw;
+            background-size: cover;
+            z-index: -1;
         }
 
-        .btn:hover {
-            background-color: #0056b3;
+        .side-image.left {
+            left: 0;
         }
 
-        #replay {
-            background-color: #28a745;
-        }
-
-        #replay:hover {
-            background-color: #1e7e34;
-        }
-
-        #returnHome {
-            background-color: #ff6f61;
-        }
-
-        #returnHome:hover {
-            background-color: #e55548;
+        .side-image.right {
+            right: 0;
         }
     </style>
 </head>
 
 <body>
-    <h1>Rock Paper scissors - Camera Mode</h1>
+
+    <div class="side-image left">
+        <img src="{{ url_for('static', filename='assets/Border.png') }}">
+    </div>
+    <div class="side-image right">
+        <img src="{{ url_for('static', filename='assets/Border.png') }}">
+    </div>
+
+    <h1>AI Image Recognition</h1>
 
     <div id="container">
-        <!-- Player's Window -->
+        <!-- Player's Camera Window -->
         <div class="window">
-            <div class="title">Player's Camera</div>
+            <div class="title">Your Camera</div>
             <video id="video" autoplay></video>
-            <p id="gesturePrediction">Detecting gesture...</p>
         </div>
 
-        <!-- AI's Window -->
+        <!-- AI Window -->
         <div class="window">
-            <div class="title">AI's Window</div>
-            <img id="ai-window" src="/static/images/rock.jpg" alt="AI's Choice">
+            <div class="title">AI's Choice</div>
+            <img id="ai-window" src="/static/assets/rock icon bg.png" alt="AI's Choice">
         </div>
     </div>
 
     <button id="startCountdown" class="btn">Start Countdown</button>
-    <a href="/" class="home-btn">Return to Home</a>
+
+
     <p id="countdown" class="hidden">Starting in 3...</p>
 
     <div id="result-container" class="hidden">
         <h2>Result</h2>
         <p id="result"></p>
-        <button id="replay" class="btn hidden">Replay</button>
-        <button id="returnHome" class="btn hidden">Return Home</button>
+        <button id="replay" class="btn">Replay</button>
+        <button id="returnHome" class="btn">Return Home</button>
     </div>
 
     <script>
         const video = document.getElementById("video");
-        const gesturePrediction = document.getElementById("gesturePrediction");
         const aiWindow = document.getElementById("ai-window");
         const startCountdown = document.getElementById("startCountdown");
         const countdown = document.getElementById("countdown");
@@ -142,17 +211,16 @@
         const returnHome = document.getElementById("returnHome");
 
         let aiInterval;
-        let aiChoice;
 
         // Start AI image rotation
         function startAiRotation() {
             const aiChoices = ["rock", "paper", "scissors"];
             aiInterval = setInterval(() => {
-                aiChoice = aiChoices[Math.floor(Math.random() * aiChoices.length)];
-                aiWindow.src = `/static/images/${aiChoice}.jpg`;
-            }, 300); // Faster rotation
+                const aiChoice = aiChoices[Math.floor(Math.random() * aiChoices.length)];
+                aiWindow.src = `/static/assets/${aiChoice} icon bg.png`;
+            }, 300);
         }
-        
+
         // Stop AI image rotation
         function stopAiRotation() {
             clearInterval(aiInterval);
@@ -162,66 +230,69 @@
         async function startCamera() {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
-
-            // Process frames every second
-            setInterval(async () => {
-                const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                const imageBlob = await new Promise((resolve) =>
-                    canvas.toBlob(resolve, "image/jpeg")
-                );
-
-                // Send frame to the server for inference
-                const formData = new FormData();
-                formData.append("image", imageBlob);
-
-                try {
-                    const response = await fetch("/predict", {
-                        method: "POST",
-                        body: formData,
-                    });
-                    const data = await response.json();
-                    if (data.gesture) {
-                        gesturePrediction.textContent = `Detected: ${data.gesture}`;
-                        startCountdown.dataset.gesture = data.gesture;
-                    } else {
-                        gesturePrediction.textContent = "Detecting gesture...";
-                    }
-                } catch (error) {
-                    console.error("Error during prediction:", error);
-                }
-            }, 1000);
         }
 
-        // Countdown Button Logic
+        // Start countdown logic
         startCountdown.addEventListener("click", () => {
             let countdownValue = 3;
             countdown.textContent = `Starting in ${countdownValue}...`;
             countdown.classList.remove("hidden");
             startCountdown.disabled = true;
 
-            const countdownInterval = setInterval(() => {
+            const interval = setInterval(() => {
                 countdownValue--;
                 countdown.textContent = `Starting in ${countdownValue}...`;
 
                 if (countdownValue === 0) {
-                    clearInterval(countdownInterval);
+                    clearInterval(interval);
                     countdown.classList.add("hidden");
-
-                    // Stop AI rotation
                     stopAiRotation();
 
-                    // Capture frame and send to backend
-                    const canvas = document.createElement("canvas");
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    // Freeze the video viewport
+                    video.pause();
 
+                    const canvas = document.createElement("canvas");
+
+                    // Set canvas size to match the displayed size of the video
+                    canvas.width = video.offsetWidth;
+                    canvas.height = video.offsetHeight;
+
+                    const ctx = canvas.getContext("2d");
+
+                    // Calculate crop area for `object-fit: cover`
+                    const videoAspectRatio = video.videoWidth / video.videoHeight;
+                    const canvasAspectRatio = canvas.width / canvas.height;
+
+                    let sx, sy, sw, sh; // Source cropping dimensions
+                    if (canvasAspectRatio > videoAspectRatio) {
+                        // Canvas is wider, crop vertically
+                        sw = video.videoWidth;
+                        sh = video.videoWidth / canvasAspectRatio;
+                        sx = 0;
+                        sy = (video.videoHeight - sh) / 2;
+                    } else {
+                        // Canvas is taller, crop horizontally
+                        sw = video.videoHeight * canvasAspectRatio;
+                        sh = video.videoHeight;
+                        sx = (video.videoWidth - sw) / 2;
+                        sy = 0;
+                    }
+
+                    // Draw the cropped video frame onto the canvas
+                    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+
+                    // Copy the video's styles to the canvas
+                    canvas.style.width = `${video.offsetWidth}px`;
+                    canvas.style.height = `${video.offsetHeight}px`;
+                    canvas.style.border = window.getComputedStyle(video).border;
+                    canvas.style.borderRadius = window.getComputedStyle(video).borderRadius;
+                    canvas.style.boxShadow = window.getComputedStyle(video).boxShadow;
+
+                    // Replace video with frozen canvas
+                    video.parentNode.insertBefore(canvas, video);
+                    video.style.display = "none";
+
+                    // Capture the frame and process
                     canvas.toBlob(async (imageBlob) => {
                         const formData = new FormData();
                         formData.append("image", imageBlob);
@@ -231,32 +302,48 @@
                                 method: "POST",
                                 body: formData,
                             });
+
+                            if (!response.ok) {
+                                throw new Error("Failed to fetch result from server");
+                            }
+
                             const data = await response.json();
 
-                            // Update AI choice image
-                            stopAiRotation();
-                            aiWindow.src = `/static/images/${data.ai_choice}.jpg`;
+                            // Handle undefined or invalid gesture
+                            if (!data.user_gesture) {
+                                result.textContent = "Error: Unable to detect your gesture. Please try again.";
+                                resultContainer.classList.remove("hidden");
+                                startCountdown.disabled = false;
+                                return;
+                            }
 
-                            // Display the result
+                            // If gesture detection is successful
+                            aiWindow.src = `/static/assets/${data.ai_choice} icon bg.png`;
                             result.textContent = `You: ${data.user_gesture}, AI: ${data.ai_choice}. ${data.result}`;
                             resultContainer.classList.remove("hidden");
-                            replay.classList.remove("hidden");
-                            returnHome.classList.remove("hidden");
+
+                            // Resume the camera
+                            canvas.remove(); // Remove the canvas
+                            video.style.display = "block"; // Show the video element
+                            video.play(); // Resume the video stream
                         } catch (error) {
-                            console.error("Error during result determination:", error);
+                            console.error(error);
+                            result.textContent = "An error occurred. Please try again.";
+                            resultContainer.classList.remove("hidden");
+                            startCountdown.disabled = false;
+                            video.play();
                         }
-                    }, "image/jpeg");
+                    });
                 }
             }, 1000);
         });
 
+
+
         // Replay button logic
         replay.addEventListener("click", () => {
             resultContainer.classList.add("hidden");
-            replay.classList.add("hidden");
-            returnHome.classList.add("hidden");
             startCountdown.disabled = false;
-            gesturePrediction.textContent = "Detecting gesture...";
             startAiRotation();
         });
 
@@ -265,7 +352,6 @@
             window.location.href = "/";
         });
 
-        // Start the camera and AI rotation
         startCamera();
         startAiRotation();
     </script>
