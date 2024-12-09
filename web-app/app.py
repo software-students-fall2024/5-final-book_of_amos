@@ -23,8 +23,8 @@ logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 
 # Initialize Flask and Socket.IO
-APP = Flask(__name__, template_folder="templates", static_folder="static")
-SOCKETIO = SocketIO(APP)
+app = Flask(__name__, template_folder="templates", static_folder="static")
+SOCKETIO = SocketIO(app)
 
 # MongoDB connection
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongodb:27017")
@@ -43,25 +43,25 @@ PLAYER_STATS = {"wins": 0, "losses": 0, "ties": 0}
 # pylint: disable=redefined-outer-name
 
 
-@APP.route("/")
+@app.route("/")
 def home():
     """Render the home page."""
     return render_template("home.html")
 
 
-@APP.route("/ai")
+@app.route("/ai")
 def ai_page():
     """Render the AI game page."""
     return render_template("ai.html")
 
 
-@APP.route("/ai_machine_learning")
+@app.route("/ai_machine_learning")
 def ai_ml_page():
     """Render the AI Machine Learning game page."""
     return render_template("ai_machine_learning.html")
 
 
-@APP.route("/real_person")
+@app.route("/real_person")
 def real_person_page():
     """Render the real person game page."""
     return render_template("real_person.html")
@@ -98,7 +98,7 @@ def retry_request(url, files, retries=5, delay=2, timeout=10):
     return None
 
 
-@APP.route("/result", methods=["POST"])
+@app.route("/result", methods=["POST"])
 def result():
     """
     Handle result endpoint for processing game results.
@@ -178,7 +178,7 @@ def determine_winners(user, ai_choice):
     return "AI wins!"
 
 
-@APP.route("/play/ai", methods=["POST"])
+@app.route("/play/ai", methods=["POST"])
 def play_against_ai():
     """
     Handle the game logic for playing against AI.
@@ -357,4 +357,4 @@ def determine_winner(player1_choice, player2_choice, player1_name, player2_name)
 # ----------- MAIN -----------
 
 if __name__ == "__main__":
-    SOCKETIO.run(APP, host="0.0.0.0", port=5000, debug=True, use_reloader=True)
+    SOCKETIO.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=True)
