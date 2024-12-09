@@ -59,11 +59,14 @@ def socket_client():
 
 @pytest.fixture
 def mock_mongodb(monkeypatch):
-    """Mock MongoDB client using mongomock"""
+    """Mock MongoDB client using mongomock."""
     import mongomock
 
+    # Create a mock MongoDB client
     mock_client = mongomock.MongoClient()
-    monkeypatch.setattr("app.collection", mock_client["stats"])
+
+    # Replace the `collection` in the app with the mock collection
+    monkeypatch.setattr("app.collection", mock_client["test"]["stats"])
 
     return mock_client
 
@@ -78,8 +81,8 @@ def setup_and_teardown():
 
 
 # testing HTTP Routes
-def test_home_page(client):
-    """Test the home page route"""
+def test_home_page(client, mock_mongodb):
+    """Test the home page route."""
     response = client.get("/")
     assert response.status_code == 200
 
@@ -117,36 +120,48 @@ def test_determine_ai_winner():
     assert determine_ai_winner("rock", "rock") == "tie"
 
 
-def test_update_player_stats():
-    """Test the update_player_stats function"""
-    from app import update_player_stats
+def test_update_player_stats(mock_mongodb):
+    """Test the update_player_stats function."""
+    from app import update_player_stats, player_stats
 
-    initial_stats = {"wins": 0, "losses": 0, "ties": 0}
-    update_player_stats("win")
-    assert player_stats["wins"] == initial_stats["wins"] + 1
-    update_player_stats("lose")
-    assert player_stats["losses"] == initial_stats["losses"] + 1
-    update_player_stats("tie")
-    assert player_stats["ties"] == initial_stats["ties"] + 1
+    # Reset player stats
+    player_stats["wins"] = 0
+    player_stats["losses"] = 0
+    player_stats["ties"] = 0
+
+    # Mock arguments
+    player_choice = "rock"
+    _id = "test_id"
+
+    # Test updates
+    update_player_stats("win", player_choice, _id)
+    assert player_stats["wins"] == 1
+
+    update_player_stats("lose", player_choice, _id)
+    assert player_stats["losses"] == 1
+
+    update_player_stats("tie", player_choice, _id)
+    assert player_stats["ties"] == 1
 
 
 # Testing AI Play Route
 def test_play_against_ai_valid(client, mock_mongodb):
-    """Test playing against AI with valid input"""
-    client.set_cookie("localhost", "db_object_id", "test_id")
+    """Test playing against AI with valid input."""
+    # Set the required cookie
+    client.set_cookie("db_object_id", "test_id")
+
+    # Make the request
     response = client.post(
-        "/play/ai", json={"player_name": "Test", "choice": "rock"})
+        "/play/ai", json={"player_name": "Test Player", "choice": "rock"}
+    )
+
+    # Assert the response
     assert response.status_code == 200
-    data = json.loads(response.data)
-    assert "player_name" in data
-    assert data["player_name"] == "Test"
-    assert "player_choice" in data
+    data = response.get_json()
+    assert data["player_name"] == "Test Player"
     assert data["player_choice"] == "rock"
-    assert "ai_choice" in data
     assert data["ai_choice"] in ["rock", "paper", "scissors"]
-    assert "result" in data
     assert data["result"] in ["win", "lose", "tie"]
-    assert "stats" in data
     assert all(key in data["stats"] for key in ["wins", "losses", "ties"])
 
 
@@ -163,20 +178,28 @@ def test_play_against_ai_invalid(client):
 
 # Test Result Route
 @patch("app.retry_request")
+@patch("app.retry_request")
 def test_result_endpoint_success(mock_retry, client, mock_mongodb):
-    """Test the result endpoint with successful ML client response"""
-    client.set_cookie("localhost", "db_object_id", "test_id")
+    """Test the result endpoint with successful ML client response."""
+    # Set the required cookie
+    client.set_cookie("db_object_id", "test_id")
+
+    # Mock the ML client response
     mock_response = MagicMock()
     mock_response.json.return_value = {"gesture": "rock"}
     mock_response.status_code = 200
     mock_retry.return_value = mock_response
 
+    # Prepare test data
     data = {"image": (BytesIO(b"test image data"), "test.jpg")}
+
+    # Send the POST request
     response = client.post("/result", data=data,
                            content_type="multipart/form-data")
 
+    # Assert the response
     assert response.status_code == 200
-    result = json.loads(response.data)
+    result = response.get_json()
     assert "user_gesture" in result
     assert result["user_gesture"] == "rock"
     assert "ai_choice" in result
@@ -208,16 +231,23 @@ def test_result_endpoint_empty_file(client):
 
 @patch("app.retry_request")
 def test_result_endpoint_ml_failure(mock_retry, client, mock_mongodb):
-    client.set_cookie("localhost", "db_object_id", "test_id")
-    """Test the result endpoint when ML client fails"""
+    """Test the result endpoint when ML client fails."""
+    # Set the required cookie
+    client.set_cookie("db_object_id", "test_id")
+
+    # Mock the ML client to simulate failure
     mock_retry.return_value = None
 
+    # Prepare test data
     data = {"image": (BytesIO(b"test image data"), "test.jpg")}
+
+    # Send the POST request
     response = client.post("/result", data=data,
                            content_type="multipart/form-data")
 
+    # Assert the response
     assert response.status_code == 500
-    result = json.loads(response.data)
+    result = response.get_json()
     assert "error" in result
     assert result["error"] == "ML client did not respond"
 
