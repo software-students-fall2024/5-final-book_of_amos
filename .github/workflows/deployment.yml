@@ -25,9 +25,10 @@ jobs:
             cd 5-final-book_of_amos
             git remote set-url origin git@github.com:software-students-fall2024/5-final-book_of_amos.git
             eval "$(ssh-agent -s)"
-            ssh-add ./.ssh/deploy
+            ssh-add ../.ssh/deploy
             ssh -T git@github.com 
             git pull origin deployment
             docker-compose up --build &
+            exit
           EOF
 
