@@ -20,7 +20,8 @@ jobs:
       - name: Deploy to Droplet
         run: |
           ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
-            ssh-add ./.ssh/droplet
+            eval "$(ssh-agent -s)"
+            ssh-add ./.ssh/deploy
             cd 5-final-book_of_amos
             git pull origin deployment
             docker-compose up --build
