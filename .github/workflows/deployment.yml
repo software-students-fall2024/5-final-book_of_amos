@@ -12,7 +12,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+          ssh-deploy-key: ${{secrets.DEPLOY_PUB}}
+      - name: Debug SSH setup
+        run: |
+          echo "Listing SSH directory"
+          ls -l ~/.ssh
+          echo "Testing SSH connection"
+          ssh -T git@github.com
       - name: Deploy to Droplet
         run: |
           ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
