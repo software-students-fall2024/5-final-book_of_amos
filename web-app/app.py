@@ -58,8 +58,34 @@ def ai_ml_page():
 @app.route("/real_person")
 def real_person_page():
     """Render the real person game page."""
-    return render_template("real_person.html")
+    return render_template('real_person.html')
 
+@app.route('/statistics')
+def statistics():
+    """Render the statistics page."""
+    _id = request.cookies.get("db_object_id", default=None)
+    if not _id:
+        _id = generate_stats_doc()
+    stats = collection.find_one({"_id": ObjectId(_id)}, {"_id": 0})
+    resp = make_response(render_template('statistics.html', stats_data=stats))
+    resp.set_cookie("db_object_id", _id)
+    return resp
+
+def generate_stats_doc():
+    """
+    Creates blank stats-tracking document.
+
+    Returns:
+        _id (str): ObjectId for newly created document
+    """
+    new_doc = {
+        "Totals": {"wins": 0, "losses": 0, "ties": 0},
+        "Rock": {"total": 0, "wins": 0},
+        "Paper": {"total": 0, "wins": 0},
+        "Scissors": {"total": 0, "wins": 0}
+    }
+    result = collection.insert_one(new_doc)
+    return str(result.inserted_id)
 
 def retry_request(url, files, retries=5, delay=2, timeout=10):
     for attempt in range(retries):

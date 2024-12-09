@@ -4,70 +4,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock Paper scissors - Home</title>
+    <title>Rock Paper Scissors - Home</title>
     <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
             text-align: center;
-            background-color: #f9f9f9;
-            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
         h1 {
-            font-size: 3rem;
-            color: #333;
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            animation: slideInFromTop 1s ease-out;
         }
 
         p {
-            font-size: 1.2rem;
-            color: #666;
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: #e0e0e0;
+            animation: fadeIn 1.5s ease-out;
         }
 
+        /* Button Container */
         .button-container {
-            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            animation: fadeIn 1.5s ease-out;
         }
 
         .btn {
-            display: inline-block;
+            text-decoration: none;
             padding: 15px 30px;
-            margin: 15px;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: #fff;
-            background-color: #007BFF;
             border: none;
-            border-radius: 8px;
+            border-radius: 50px;
             cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .btn:hover {
-            background-color: #0056b3;
+        /* Waiting Message */
+        #waitingMessage {
+            color: red;
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
-        .btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+        /* Matched Message */
+        #matchedMessage {
+            color: green;
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
-        .secondary-btn {
-            background-color: #28a745;
+        /* Countdown Message */
+        #countdownMessage {
+            color: green;
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
-        .secondary-btn:hover {
-            background-color: #1e7e34;
+        .btn-primary {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
         }
 
-        .info-btn {
-            background-color: #ffc107;
-            color: #333;
+        .btn-primary:hover {
+            background: linear-gradient(to right, #e23e57, #d63333);
+            transform: translateY(-3px);
         }
 
-        .info-btn:hover {
-            background-color: #e0a800;
+        .btn-secondary {
+            background: linear-gradient(to right, #42e695, #3bb2b8);
         }
 
+        .btn-secondary:hover {
+            background: linear-gradient(to right, #36d687, #34a4a7);
+            transform: translateY(-3px);
+        }
+
+        .btn-info {
+            background: linear-gradient(to right, #f7971e, #ffd200);
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(to right, #f68a1e, #f3c400);
+            transform: translateY(-3px);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            font-size: 1rem;
+            color: #e0e0e0;
+            animation: slideInFromBottom 1.5s ease-out;
+        }
+
+        /* Modal Styles (Initially Hidden) */
         .modal {
             display: none;
             position: fixed;
@@ -83,66 +134,98 @@
 
         .modal-content {
             background-color: #fff;
+            color: #333;
             padding: 20px;
             border-radius: 10px;
             text-align: center;
             width: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .modal-content p {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+        /* Animations */
+        @keyframes slideInFromTop {
+            0% {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        .modal-content .btn {
-            margin: 10px;
+        @keyframes slideInFromBottom {
+            0% {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        #loadingMessage {
-            color: #007BFF;
-            font-size: 1.5rem;
-            margin-top: 30px;
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
-        #countdownMessage {
-            font-size: 1.5rem;
-            color: red;
-            margin-top: 20px;
-        }
+    #bgVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    }
     </style>
 </head>
 
 <body>
-    <h1>Welcome to Rock Paper scissors!</h1>
-    <p>Choose your game mode, invite a friend, match with a random player, or view rankings:</p>
+
+    <video autoplay muted loop id="bgVideo">
+        <source src="{{ url_for('static', filename='assets/icons.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <h1>Welcome to Rock Paper Scissors!</h1>
+    <p>Choose your game mode and challenge yourself or a friend.</p>
+
     <div class="button-container">
-        <a href="/ai" class="btn">Play Against AI</a>
-        <a href="/ai_machine_learning" class="btn">Play AI with Camera</a>
-        <button class="btn" id="inviteFriendBtn">Invite a Friend</button>
-        <button class="btn" id="matchRandomBtn">Match Randomly</button>
-        <a href="/rankings" class="secondary-btn">View Rankings</a>
-        <button class="info-btn" id="saveSessionBtn">Save Session</button>
+        <a href="/ai" class="btn btn-primary">Play Against AI</a>
+        <a href="/ai_machine_learning" class="btn btn-secondary">Play Against AI with Camera</a>
+        <button id="matchRandomBtn" class="btn btn-info">Match with Random Player</button>
+        <a href="/statistics" class="btn btn-secondary">View Your Statistics</a>
     </div>
 
-    <!-- Waiting Modal -->
+    <p class="footer">Developed with ❤️ for endless fun. Enjoy playing!</p>
+
+    <!-- Waiting Modal (Hidden Initially) -->
     <div class="modal" id="waitingModal">
         <div class="modal-content">
             <p id="waitingMessage">Waiting for an opponent...</p>
-            <button class="btn secondary-btn" id="cancelWaitingBtn">Cancel</button>
+            <button class="btn btn-secondary" id="cancelWaitingBtn">Cancel</button>
         </div>
     </div>
 
-    <!-- Matched Modal -->
+    <!-- Matched Modal (Hidden Initially) -->
     <div class="modal" id="matchedModal">
         <div class="modal-content">
             <p id="matchedMessage"></p>
             <p id="countdownMessage"></p>
-            <button id="startGameBtn" class="btn">Start Game</button>
-            <button class="btn secondary-btn" id="cancelMatchedBtn">Cancel</button>
+            <button id="startGameBtn" class="btn btn-primary">Start Game</button>
+            <button class="btn btn-secondary" id="cancelMatchedBtn">Cancel</button>
         </div>
     </div>
-
-    <div id="loadingMessage" style="display: none;"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.min.js"></script>
     <script>
