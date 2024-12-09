@@ -24,6 +24,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
             eval "$(ssh-agent -s)"
             ssh-add ./.ssh/deploy
-            ssh -T git@github.com
+            
+
           EOF
 
