@@ -40,6 +40,8 @@ PLAYER_STATS = {"wins": 0, "losses": 0, "ties": 0}
 
 # ----------- ROUTES -----------
 
+# pylint: disable=redefined-outer-name
+
 
 @APP.route("/")
 def home():
@@ -87,7 +89,8 @@ def retry_request(url, files, retries=5, delay=2, timeout=10):
             response.raise_for_status()
             return response
         except RequestException as error:
-            LOGGER.warning("Retry attempt %d failed: %s", attempt + 1, str(error))
+            LOGGER.warning("Retry attempt %d failed: %s",
+                           attempt + 1, str(error))
             if attempt < retries - 1:
                 time.sleep(delay)
             else:
