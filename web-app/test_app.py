@@ -63,7 +63,8 @@ def mock_mongodb(monkeypatch):
     import mongomock
 
     mock_client = mongomock.MongoClient()
-    monkeypatch.setattr("app.MongoClient", lambda uri: mock_client)
+    monkeypatch.setattr("app.collection", mock_client["stats"])
+
     return mock_client
 
 
@@ -120,14 +121,11 @@ def test_update_player_stats():
     """Test the update_player_stats function"""
     from app import update_player_stats
 
-    initial_stats = player_stats.copy()
-
+    initial_stats = {"wins": 0, "losses": 0, "ties": 0}
     update_player_stats("win")
     assert player_stats["wins"] == initial_stats["wins"] + 1
-
     update_player_stats("lose")
     assert player_stats["losses"] == initial_stats["losses"] + 1
-
     update_player_stats("tie")
     assert player_stats["ties"] == initial_stats["ties"] + 1
 
@@ -135,6 +133,7 @@ def test_update_player_stats():
 # Testing AI Play Route
 def test_play_against_ai_valid(client, mock_mongodb):
     """Test playing against AI with valid input"""
+    client.set_cookie("localhost", "db_object_id", "test_id")
     response = client.post(
         "/play/ai", json={"player_name": "Test", "choice": "rock"})
     assert response.status_code == 200
@@ -166,6 +165,7 @@ def test_play_against_ai_invalid(client):
 @patch("app.retry_request")
 def test_result_endpoint_success(mock_retry, client, mock_mongodb):
     """Test the result endpoint with successful ML client response"""
+    client.set_cookie("localhost", "db_object_id", "test_id")
     mock_response = MagicMock()
     mock_response.json.return_value = {"gesture": "rock"}
     mock_response.status_code = 200
@@ -208,6 +208,7 @@ def test_result_endpoint_empty_file(client):
 
 @patch("app.retry_request")
 def test_result_endpoint_ml_failure(mock_retry, client, mock_mongodb):
+    client.set_cookie("localhost", "db_object_id", "test_id")
     """Test the result endpoint when ML client fails"""
     mock_retry.return_value = None
 
