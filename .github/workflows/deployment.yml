@@ -19,7 +19,7 @@ jobs:
 
       - name: Deploy to Droplet
         run: |
-          ssh -T -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
+          ssh -T -o StrictHostKeyChecking=no root@143.198.0.220 << 'EOF'
             ls -la
             docker stop $(docker ps -a -q)
             cd 5-final-book_of_amos 
