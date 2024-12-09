@@ -1,0 +1,36 @@
+name: Deploy to Droplet
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Re-clone repository
+        run: |
+          rm -rf .git
+          git clone https://github.com/yourusername/your-repository.git .src
+      - name: Print working directory
+        run: pwd
+
+      - name: List files in the current directory
+        run: ls -la
+
+      - name: Deploy to Droplet
+        run: |
+          ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
+            git pull origin main
+            docker-compose -f docker-compose.yml up -d
+          EOF
+        working-directory: src
+
