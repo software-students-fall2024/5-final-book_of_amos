@@ -33,10 +33,10 @@ DB = CLIENT["rps_database"]
 COLLECTION = DB["stats"]
 
 # In-memory data
-WAITING_PLAYERS = []
-ACTIVE_GAMES = {}
+waiting_players = []
+active_games = {}
 MATCHMAKING_LOCK = Lock()
-PLAYER_STATS = {"wins": 0, "losses": 0, "ties": 0}
+player_stats = {"wins": 0, "losses": 0, "ties": 0}
 
 # ----------- ROUTES -----------
 
@@ -202,7 +202,7 @@ def play_against_ai():
             "player_choice": player_choice,
             "ai_choice": ai_choice,
             "result": result,
-            "stats": PLAYER_STATS,
+            "stats": player_stats,
         }
     )
 
@@ -234,11 +234,11 @@ def update_player_stats(new_result):
         result (str): The result of the game ("win", "lose", or "tie").
     """
     if new_result == "win":
-        PLAYER_STATS["wins"] += 1
+        player_stats["wins"] += 1
     elif new_result == "lose":
-        PLAYER_STATS["losses"] += 1
+        player_stats["losses"] += 1
     elif new_result == "tie":
-        PLAYER_STATS["ties"] += 1
+        player_stats["ties"] += 1
 
 
 # ----------- MATCHMAKING AND GAME MANAGEMENT -----------
@@ -252,14 +252,14 @@ def handle_disconnect():
     Removes the player from the game or matchmaking queue.
     """
     sid = request.sid
-    for game_id, game in list(ACTIVE_GAMES.items()):
+    for game_id, game in list(active_games.items()):
         if game["player1_sid"] == sid:
             game["player1_sid"] = None
         elif game["player2_sid"] == sid:
             game["player2_sid"] = None
 
         if not game["player1_sid"] and not game["player2_sid"]:
-            del ACTIVE_GAMES[game_id]
+            del active_games[game_id]
 
 
 @socketio.on("submit_choice")
@@ -274,11 +274,11 @@ def handle_submit_choice(data):
     player_id = data.get("player_id")
     choice = data.get("choice")
 
-    if game_id not in ACTIVE_GAMES:
+    if game_id not in active_games:
         emit("error", {"message": "Invalid game ID."})
         return
 
-    game = ACTIVE_GAMES[game_id]
+    game = active_games[game_id]
 
     if player_id == game["player1_id"]:
         game["player1_choice"] = choice
@@ -316,9 +316,9 @@ def reset_game(game_id):
     Args:
         game_id (str): The ID of the game to reset.
     """
-    if game_id in ACTIVE_GAMES:
-        ACTIVE_GAMES[game_id]["player1_choice"] = None
-        ACTIVE_GAMES[game_id]["player2_choice"] = None
+    if game_id in active_games:
+        active_games[game_id]["player1_choice"] = None
+        active_games[game_id]["player2_choice"] = None
 
 
 def determine_winner(player1_choice, player2_choice, player1_name, player2_name):
