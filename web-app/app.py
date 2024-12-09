@@ -24,7 +24,7 @@ LOGGER = logging.getLogger(__name__)
 
 # Initialize Flask and Socket.IO
 app = Flask(__name__, template_folder="templates", static_folder="static")
-SOCKETIO = SocketIO(app)
+socketio = SocketIO(app)
 
 # MongoDB connection
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongodb:27017")
@@ -244,7 +244,7 @@ def update_player_stats(new_result):
 # ----------- MATCHMAKING AND GAME MANAGEMENT -----------
 
 
-@SOCKETIO.on("disconnect")
+@socketio.on("disconnect")
 def handle_disconnect():
     """
     Handle a player's disconnection.
@@ -262,7 +262,7 @@ def handle_disconnect():
             del ACTIVE_GAMES[game_id]
 
 
-@SOCKETIO.on("submit_choice")
+@socketio.on("submit_choice")
 def handle_submit_choice(data):
     """
     Handle a player's choice submission.
@@ -295,7 +295,7 @@ def handle_submit_choice(data):
             game["player1_name"],
             game["player2_name"],
         )
-        SOCKETIO.emit(
+        socketio.emit(
             "game_result",
             {
                 "player1_name": game["player1_name"],
@@ -357,4 +357,4 @@ def determine_winner(player1_choice, player2_choice, player1_name, player2_name)
 # ----------- MAIN -----------
 
 if __name__ == "__main__":
-    SOCKETIO.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=True)
