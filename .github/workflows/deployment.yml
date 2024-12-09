@@ -21,7 +21,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
             cd 5-final-book_of_amos
-            git pull origin main
+            git pull origin deployment
             docker-compose up --build
           EOF
 
