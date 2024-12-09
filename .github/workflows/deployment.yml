@@ -22,6 +22,8 @@ jobs:
       - name: Deploy to Droplet
         run: |
           ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
-            echo hi
+            eval "$(ssh-agent -s)"
+            ssh-add ./.ssh/deploy
+            ssh -T git@github.com
           EOF
 
