@@ -20,14 +20,6 @@ jobs:
       - name: Deploy to Droplet
         run: |
           ssh -T -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
-            ls
-            docker stop $(docker ps -a -q)
-            cd 5-final-book_of_amos 
-            git remote set-url origin git@github.com:software-students-fall2024/5-final-book_of_amos.git
-            eval "$(ssh-agent -s)"
-            ssh-add ../.ssh/deploy
-            git pull origin deployment
-            docker-compose up --build -d &
-            exit
+            echo hi
           EOF
 
