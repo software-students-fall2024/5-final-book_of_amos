@@ -16,17 +16,12 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Print working directory
-        run: pwd
-
-      - name: List files in the current directory
-        run: ls -la
 
       - name: Deploy to Droplet
         run: |
           ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
             cd 5-final-book_of_amos
             git pull origin main
-            docker-compose up -d
+            docker-compose up --build
           EOF
 

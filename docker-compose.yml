@@ -17,6 +17,15 @@ services:
       - MONGO_URI=mongodb://mongodb:27017  
       - FLASK_ENV=development
 
+  nginx: 
+        image: nginx:latest
+        volumes:
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        depends_on:
+        - web-app
+        ports:
+        - "80:80"
+
   machine-learning-client:
     build:
       context: ./machine-learning-client
