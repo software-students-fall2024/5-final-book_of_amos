@@ -18,6 +18,7 @@ import requests
 from requests.exceptions import RequestException
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from bson.json_util import dumps,loads
 
 # Initialize Flask and Socket.IO
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -40,7 +41,11 @@ player_stats = {"wins": 0, "losses": 0, "ties": 0}
 @app.route("/")
 def home():
     """Render the home page."""
-    return render_template("home.html")
+
+    resp = make_response(render_template("home.html"))
+    if "db_object_id" not in request.cookies:
+        resp.set_cookie("db_object_id", generate_stats_doc())
+    return resp
 
 
 @app.route("/ai")
@@ -60,7 +65,10 @@ def real_person_page():
     """Render the real person game page."""
     return render_template('real_person.html')
 
-@app.route('/statistics')
+
+@app.route("/statistics")
+
+
 def statistics():
     """Render the statistics page."""
     _id = request.cookies.get("db_object_id", default=None)
@@ -75,17 +83,21 @@ def generate_stats_doc():
     """
     Creates blank stats-tracking document.
 
+
     Returns:
         _id (str): ObjectId for newly created document
     """
-    new_doc = {
-        "Totals": {"wins": 0, "losses": 0, "ties": 0},
-        "Rock": {"total": 0, "wins": 0},
-        "Paper": {"total": 0, "wins": 0},
-        "Scissors": {"total": 0, "wins": 0}
+
+    stats = {
+        "rock": {"wins": 0, "losses": 0, "ties": 0, "total": 0},
+        "paper": {"wins": 0, "losses": 0, "ties": 0, "total": 0},
+        "scissors": {"wins": 0, "losses": 0, "ties": 0, "total": 0},
+        "totals": {"wins": 0, "losses": 0, "ties": 0},
     }
-    result = collection.insert_one(new_doc)
-    return str(result.inserted_id)
+    _id = str(collection.insert_one(stats).inserted_id)
+    return _id
+
+
 
 def retry_request(url, files, retries=5, delay=2, timeout=10):
     for attempt in range(retries):
@@ -138,6 +150,13 @@ def result():
         ai_gesture = random.choice(["rock", "paper", "scissors"])
         game_result = determine_winners(user_gesture, ai_gesture)
 
+        _id = request.cookies['db_object_id']
+        stats = collection.find_one({"_id": ObjectId(_id)})
+        
+        stats = update_player_stats(determine_ai_winner(user_gesture, ai_gesture), user_gesture, _id)
+
+
+
         return jsonify(
             {
                 "user_gesture": user_gesture,
@@ -188,17 +207,18 @@ def play_against_ai():
         return jsonify({"error": "Invalid choice"}), 400
     ai_choice = random.choice(["rock", "paper", "scissors"])
     result = determine_ai_winner(player_choice, ai_choice)
-    update_player_stats(result)
-
-    return jsonify(
-        {
-            "player_name": player_name,
-            "player_choice": player_choice,
-            "ai_choice": ai_choice,
-            "result": result,
-            "stats": player_stats,
-        }
-    )
+    _id = request.cookies['db_object_id']
+    stats = collection.find_one({"_id": ObjectId(_id)})
+    
+    stats = update_player_stats(result, player_choice, _id)
+    
+    return jsonify({
+        "player_name": player_name,
+        "player_choice": player_choice,
+        "ai_choice": ai_choice,
+        "result": result,   
+        "stats": (stats['totals'])
+    })
 
 
 def determine_ai_winner(player_choice, ai_choice):
@@ -213,16 +233,28 @@ def determine_ai_winner(player_choice, ai_choice):
     return outcomes[player_choice][ai_choice]
 
 
-def update_player_stats(result):
+def update_player_stats(result, player_choice, _id):
     """
     Update the player's stats based on the result of the game.
     """
-    if result == "win":
-        player_stats["wins"] += 1
-    elif result == "lose":
-        player_stats["losses"] += 1
-    elif result == "tie":
-        player_stats["ties"] += 1
+    if result != "lose":
+        result += 's'
+    else:
+        result = 'losses'
+    
+    res = collection.update_one(
+        {"_id": ObjectId(_id)},
+        {
+            "$inc": {
+                "totals" + "." + result: 1,
+                player_choice + "." + result: 1,
+                player_choice + "." + "total": 1,
+            }
+        },
+        upsert=False,
+    )
+    return collection.find_one({"_id": ObjectId(_id)})
+
 
 
 # ----------- MATCHMAKING -----------

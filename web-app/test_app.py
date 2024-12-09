@@ -17,6 +17,16 @@ Unit tests for the Flask application defined in `app.py`.
 # pylint test_app.py
 # black .
 
+from app import (
+    app,
+    socketio,
+    determine_winners,
+    determine_ai_winner,
+    retry_request,
+    active_games,
+    waiting_players,
+    player_stats,
+)
 import os
 import json
 import pytest
@@ -31,16 +41,6 @@ import sys
 eventlet_mock = MagicMock()
 eventlet_mock.monkey_patch = MagicMock()
 sys.modules["eventlet"] = eventlet_mock
-from app import (
-    app,
-    socketio,
-    determine_winners,
-    determine_ai_winner,
-    retry_request,
-    active_games,
-    waiting_players,
-    player_stats,
-)
 
 
 @pytest.fixture
@@ -135,7 +135,8 @@ def test_update_player_stats():
 # Testing AI Play Route
 def test_play_against_ai_valid(client, mock_mongodb):
     """Test playing against AI with valid input"""
-    response = client.post("/play/ai", json={"player_name": "Test", "choice": "rock"})
+    response = client.post(
+        "/play/ai", json={"player_name": "Test", "choice": "rock"})
     assert response.status_code == 200
     data = json.loads(response.data)
     assert "player_name" in data
@@ -171,7 +172,8 @@ def test_result_endpoint_success(mock_retry, client, mock_mongodb):
     mock_retry.return_value = mock_response
 
     data = {"image": (BytesIO(b"test image data"), "test.jpg")}
-    response = client.post("/result", data=data, content_type="multipart/form-data")
+    response = client.post("/result", data=data,
+                           content_type="multipart/form-data")
 
     assert response.status_code == 200
     result = json.loads(response.data)
@@ -185,7 +187,8 @@ def test_result_endpoint_success(mock_retry, client, mock_mongodb):
 
 def test_result_endpoint_no_image(client):
     """Test the result endpoint with no image"""
-    response = client.post("/result", data={}, content_type="multipart/form-data")
+    response = client.post(
+        "/result", data={}, content_type="multipart/form-data")
     assert response.status_code == 400
     result = json.loads(response.data)
     assert "error" in result
@@ -195,7 +198,8 @@ def test_result_endpoint_no_image(client):
 def test_result_endpoint_empty_file(client):
     """Test the result endpoint with empty file"""
     data = {"image": (BytesIO(b""), "")}
-    response = client.post("/result", data=data, content_type="multipart/form-data")
+    response = client.post("/result", data=data,
+                           content_type="multipart/form-data")
     assert response.status_code == 400
     result = json.loads(response.data)
     assert "error" in result
@@ -208,7 +212,8 @@ def test_result_endpoint_ml_failure(mock_retry, client, mock_mongodb):
     mock_retry.return_value = None
 
     data = {"image": (BytesIO(b"test image data"), "test.jpg")}
-    response = client.post("/result", data=data, content_type="multipart/form-data")
+    response = client.post("/result", data=data,
+                           content_type="multipart/form-data")
 
     assert response.status_code == 500
     result = json.loads(response.data)
@@ -238,7 +243,8 @@ def test_retry_request_function(mock_post):
 
     # Test failed request with retries
     mock_post.side_effect = [RequestException("Test error")] * 3
-    result = retry_request("http://test.com/predict", mock_files, retries=3, delay=0)
+    result = retry_request("http://test.com/predict",
+                           mock_files, retries=3, delay=0)
     assert result is None
     assert mock_post.call_count == 3  # Initial try + 2 retries
 
@@ -279,7 +285,8 @@ def test_cancel_match(socket_client):
         "player2_name": "Player2",
     }
 
-    socket_client.emit("cancel_match", {"game_id": game_id, "player_id": player_id})
+    socket_client.emit(
+        "cancel_match", {"game_id": game_id, "player_id": player_id})
 
     assert game_id not in active_games
 
@@ -303,7 +310,8 @@ def test_join_game_success(socket_client):
         "player2_name": "Player2",
     }
 
-    socket_client.emit("join_game", {"game_id": game_id, "player_id": player_id})
+    socket_client.emit(
+        "join_game", {"game_id": game_id, "player_id": player_id})
 
     received = socket_client.get_received()
     assert len(received) == 1
@@ -312,7 +320,8 @@ def test_join_game_success(socket_client):
 
 def test_join_game_invalid_game(socket_client):
     """Test joining an invalid game"""
-    socket_client.emit("join_game", {"game_id": "invalid_game", "player_id": "123"})
+    socket_client.emit(
+        "join_game", {"game_id": "invalid_game", "player_id": "123"})
 
     received = socket_client.get_received()
     assert len(received) == 1
@@ -325,7 +334,8 @@ def test_join_game_invalid_player(socket_client):
     game_id = "test_game"
     active_games[game_id] = {"player1_id": "123", "player2_id": "456"}
 
-    socket_client.emit("join_game", {"game_id": game_id, "player_id": "invalid_player"})
+    socket_client.emit(
+        "join_game", {"game_id": game_id, "player_id": "invalid_player"})
 
     received = socket_client.get_received()
     assert len(received) == 1
@@ -351,7 +361,8 @@ def test_reset_game():
     from app import reset_game
 
     game_id = "test_game"
-    active_games[game_id] = {"player1_choice": "rock", "player2_choice": "paper"}
+    active_games[game_id] = {
+        "player1_choice": "rock", "player2_choice": "paper"}
 
     reset_game(game_id)
     assert active_games[game_id]["player1_choice"] is None
@@ -360,7 +371,8 @@ def test_reset_game():
 
 def test_random_match_first_player(socket_client):
     """Test first player joining random match"""
-    socket_client.emit("random_match", {"player_name": "Player1", "player_id": "123"})
+    socket_client.emit(
+        "random_match", {"player_name": "Player1", "player_id": "123"})
     received = socket_client.get_received()
     assert len(received) == 1
     assert received[0]["name"] == "waiting"
@@ -376,7 +388,8 @@ def test_random_match_second_player(socket_client):
     )
 
     socket_client.emit(
-        "random_match", {"player_name": "Player2", "player_id": "456"}  # second player
+        "random_match", {"player_name": "Player2",
+                         "player_id": "456"}  # second player
     )
 
     received = socket_client.get_received()
@@ -430,7 +443,8 @@ def test_submit_choice(socket_client):
     }
 
     socket_client.emit(
-        "submit_choice", {"game_id": game_id, "player_id": "123", "choice": "rock"}
+        "submit_choice", {"game_id": game_id,
+                          "player_id": "123", "choice": "rock"}
     )
     assert active_games[game_id]["player1_choice"] == "rock"
 
@@ -454,7 +468,8 @@ def test_countdown_timer():
 
 def test_handle_cancel_match_missing_data(socket_client):
     """Test canceling match with missing data"""
-    socket_client.emit("cancel_match", {"game_id": "test_game"})  # Missing player_id
+    socket_client.emit(
+        "cancel_match", {"game_id": "test_game"})  # Missing player_id
     received = socket_client.get_received()
     assert received[0]["name"] == "error"
     assert "required" in received[0]["args"][0]["message"].lower()
@@ -462,7 +477,8 @@ def test_handle_cancel_match_missing_data(socket_client):
 
 def test_start_game_missing_data(socket_client):
     """Test starting game with missing data"""
-    socket_client.emit("start_game", {"game_id": "test_game"})  # Missing player_id
+    socket_client.emit(
+        "start_game", {"game_id": "test_game"})  # Missing player_id
     received = socket_client.get_received()
     assert received[0]["name"] == "error"
     assert "required" in received[0]["args"][0]["message"].lower()
@@ -470,7 +486,8 @@ def test_start_game_missing_data(socket_client):
 
 def test_join_game_missing_data(socket_client):
     """Test joining game with missing data"""
-    socket_client.emit("join_game", {"game_id": "test_game"})  # Missing player_id
+    socket_client.emit(
+        "join_game", {"game_id": "test_game"})  # Missing player_id
     received = socket_client.get_received()
     assert received[0]["name"] == "error"
     assert "required" in received[0]["args"][0]["message"].lower()

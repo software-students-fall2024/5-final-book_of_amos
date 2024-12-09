@@ -15,22 +15,17 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Re-clone repository
-        run: |
-          rm -rf .git
-          git clone https://github.com/yourusername/your-repository.git .src
-      - name: Print working directory
-        run: pwd
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
 
-      - name: List files in the current directory
-        run: ls -la
-
-      - name: Deploy to Droplet
+      - name: Deploy To Droplet
         run: |
-          ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
+          ssh -T -o StrictHostKeyChecking=no root@143.198.0.220 << 'EOF'
+            docker stop $(docker ps -a -q)
+            cd 5-final-book_of_amos 
+            git remote set-url origin git@github.com:software-students-fall2024/5-final-book_of_amos.git
+            eval "$(ssh-agent -s)"
+            ssh-add ../.ssh/deploy
             git pull origin main
-            docker-compose -f docker-compose.yml up -d
+            docker-compose up --build -d &
+            exit
           EOF
-        working-directory: src
-

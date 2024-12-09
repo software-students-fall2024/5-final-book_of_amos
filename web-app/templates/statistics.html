@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Statistics</title>
     <style>
+
         /* General Reset */
         * {
             margin: 0;
@@ -53,11 +54,13 @@
             color: #555;
         }
 
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
         }
+
 
         table th, table td {
             border: 1px solid #ddd;
@@ -127,10 +130,11 @@
                 <th>Ties</th>
             </tr>
             <tr>
-                <td id="total-games">0</td>
-                <td id="wins">{{stats_data['Totals']['wins']}}</td>
-                <td id="losses">{{stats_data['Totals']['losses']}}</td>
-                <td id="ties">{{stats_data['Totals']['ties']}}</td>
+                <td id="total-games">{{stats_data['totals']['wins'] + stats_data['totals']['losses'] + stats_data['totals']['ties']}}</td>
+                <td id="wins">{{stats_data['totals']['wins']}}</td>
+                <td id="losses">{{stats_data['totals']['losses']}}</td>
+                <td id="ties">{{stats_data['totals']['ties']}}</td>
+
             </tr>
         </table>
 
@@ -143,26 +147,32 @@
             </tr>
             <tr>
                 <td>Rock</td>
-                <td id="rock-usage">{{stats_data['Rock']['total']}}</td>
+
+                <td id="rock-usage">{{stats_data['rock']['total']}}</td>
                 <td id="rock-win-rate">{{
-                    stats_data['Rock']['wins']/stats_data['Rock']['total'] * 100
-                    if stats_data['Rock']['total'] != 0 else 0.0
+                    stats_data['rock']['wins']/stats_data['rock']['total'] * 100
+                    if stats_data['rock']['total'] != 0 else 0.0
+
                 }}%</td>
             </tr>
             <tr>
                 <td>Paper</td>
-                <td id="paper-usage">{{stats_data['Paper']['total']}}</td>
+
+                <td id="paper-usage">{{stats_data['paper']['total']}}</td>
                 <td id="paper-win-rate">{{
-                    stats_data['Paper']['wins']/stats_data['Paper']['total'] * 100
-                    if stats_data['Paper']['total'] != 0  else 0.0
+                    stats_data['paper']['wins']/stats_data['paper']['total'] * 100
+                    if stats_data['paper']['total'] != 0  else 0.0
+
                 }}%</td>
             </tr>
             <tr>
                 <td>Scissors</td>
-                <td id="scissors-usage">{{stats_data['Scissors']['total']}}</td>
+
+                <td id="scissors-usage">{{stats_data['scissors']['total']}}</td>
                 <td id="scissors-win-rate">{{
-                    stats_data['Scissors']['wins']/stats_data['Scissors']['total'] * 100
-                    if stats_data['Scissors']['total'] != 0 else 0.0
+                    stats_data['scissors']['wins']/stats_data['scissors']['total'] * 100
+                    if stats_data['scissors']['total'] != 0 else 0.0
+
                 }}%</td>
             </tr>
         </table>
@@ -177,8 +187,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+
         const ctx = document.getElementById('gameChart').getContext('2d');
         const stats_data = JSON.parse('{{stats_data | tojson}}');
+
 
         const gameChart = new Chart(ctx, {
             type: 'doughnut',
@@ -186,15 +198,19 @@
                 labels: ['Wins', 'Losses', 'Ties'],
                 datasets: [{
                     label: 'Game Outcomes',
-                    data: [stats_data['Totals']['wins'], stats_data['Totals']['losses'], stats_data['Totals']['ties']],
+
+                    data: [stats_data['totals']['wins'], stats_data['totals']['losses'], stats_data['totals']['ties']],
                     backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
-                    hoverOffset: 6
+                    hoverOffset: 4
+
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
+
                     legend: { position: 'top' },
+
                     tooltip: {
                         callbacks: {
                             label: (tooltipItem) => {
