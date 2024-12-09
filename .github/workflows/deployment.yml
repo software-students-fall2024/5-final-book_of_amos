@@ -16,9 +16,7 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.DEPLOY_KEY }}
-      - name: debug
-        run: |
-          ls -la
+
       - name: Deploy to Droplet
         run: |
           ssh -T -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
