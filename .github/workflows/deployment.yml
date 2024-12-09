@@ -24,7 +24,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@161.35.132.193 << 'EOF'
             eval "$(ssh-agent -s)"
             ssh-add ./.ssh/deploy
-            
-
+            ssh -T git@github.com
+            cd 5-final-book_of_amos
+            git pull origin deployment
+            docker-compose up --build
           EOF
 
