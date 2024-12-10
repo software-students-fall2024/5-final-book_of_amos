@@ -1,0 +1,1 @@
+Database(MongoClient(host=['mongodb:27017'], document_class=dict, tz_aware=False, connect=True), 'rps_database')

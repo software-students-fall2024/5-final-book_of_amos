@@ -130,7 +130,7 @@
                 <th>Ties</th>
             </tr>
             <tr>
-                <td id="total-games">{{stats_data['totals']['wins'] + stats_data['totals']['losses'] + stats_data['totals']['ties']}}</td>
+                <td id="total-games">{{ stats_data['totals'].get('wins', 0) + stats_data['totals'].get('losses', 0) + stats_data['totals'].get('ties', 0) }}</td>
                 <td id="wins">{{stats_data['totals']['wins']}}</td>
                 <td id="losses">{{stats_data['totals']['losses']}}</td>
                 <td id="ties">{{stats_data['totals']['ties']}}</td>
@@ -169,11 +169,12 @@
                 <td>Scissors</td>
 
                 <td id="scissors-usage">{{stats_data['scissors']['total']}}</td>
-                <td id="scissors-win-rate">{{
-                    stats_data['scissors']['wins']/stats_data['scissors']['total'] * 100
-                    if stats_data['scissors']['total'] != 0 else 0.0
-
-                }}%</td>
+                <td id="scissors-win-rate">
+                    {{
+                        stats_data['scissors'].get('wins', 0) / stats_data['scissors'].get('total', 1) * 100
+                        if stats_data['scissors'].get('total', 0) != 0 else 0
+                    }}%
+                </td>
             </tr>
         </table>
 
@@ -189,7 +190,7 @@
     <script>
 
         const ctx = document.getElementById('gameChart').getContext('2d');
-        const stats_data = JSON.parse('{{stats_data | tojson}}');
+        const stats_data = JSON.parse('{{ stats_data | tojson | safe }}');
 
 
         const gameChart = new Chart(ctx, {
