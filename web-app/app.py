@@ -69,15 +69,65 @@ def real_person_page():
 @app.route("/statistics")
 
 
+@app.route("/statistics")
 def statistics():
-    """Render the statistics page."""
+    """
+    Render the statistics page with player stats.
+    """
     _id = request.cookies.get("db_object_id", default=None)
+
     if not _id:
         _id = generate_stats_doc()
-    stats = collection.find_one({"_id": ObjectId(_id)}, {"_id": 0})
-    resp = make_response(render_template('statistics.html', stats_data=stats))
+
+    # Fetch stats document
+    stats = collection.find_one({"_id": ObjectId(_id)}, {"_id": 0})  # Exclude _id field here
+    if not stats:
+        stats = generate_default_stats()
+        collection.insert_one(stats)
+    else:
+        stats = ensure_stats_structure(stats, _id)
+
+    # Explicitly convert ObjectId to a string if needed
+    stats['_id'] = str(_id)
+
+    resp = make_response(render_template("statistics.html", stats_data=stats))
     resp.set_cookie("db_object_id", _id)
     return resp
+
+
+def ensure_stats_structure(stats, _id):
+    """
+    Ensure the stats document has the correct structure and initialize missing fields.
+    """
+    default_stats = generate_default_stats()
+    updated = False
+
+    for key in default_stats:
+        if key not in stats:
+            stats[key] = default_stats[key]
+            updated = True
+        else:
+            for subkey in default_stats[key]:
+                if subkey not in stats[key]:
+                    stats[key][subkey] = default_stats[key][subkey]
+                    updated = True
+
+    if updated:
+        collection.update_one({"_id": ObjectId(_id)}, {"$set": stats})
+
+    return stats
+
+
+def generate_default_stats():
+    """
+    Returns a default stats document.
+    """
+    return {
+        "rock": {"wins": 0, "losses": 0, "ties": 0, "total": 0},
+        "paper": {"wins": 0, "losses": 0, "ties": 0, "total": 0},
+        "scissors": {"wins": 0, "losses": 0, "ties": 0, "total": 0},
+        "totals": {"wins": 0, "losses": 0, "ties": 0},
+    }
 
 def generate_stats_doc():
     """
