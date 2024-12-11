@@ -13,7 +13,7 @@ from threading import Lock
 import os
 import time
 import random
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response, Request, Response
 import requests
 from requests.exceptions import RequestException
 from pymongo import MongoClient
@@ -42,42 +42,45 @@ player_stats = {"wins": 0, "losses": 0, "ties": 0}
 def home():
     """Render the home page."""
 
-    resp = make_response(render_template("home.html"))
-    if "db_object_id" not in request.cookies:
-        resp.set_cookie("db_object_id", generate_stats_doc())
-    return resp
+    response = make_response(render_template("home.html"))
+    res = cookie_management(request, response)
+    return res
 
 
 @app.route("/ai")
 def ai_page():
     """Render the AI game page."""
-    return render_template("ai.html")
+    response = make_response(render_template("ai.html"))
+    res = cookie_management(request, response)
+    return res
 
 
 @app.route("/ai_machine_learning")
 def ai_ml_page():
     """Render the AI Machine Learning game page."""
-    return render_template("ai_machine_learning.html")
+    response = make_response(render_template("ai_machine_learning.html"))
+    res = cookie_management(request, response)
+    return res
 
 
 @app.route("/real_person")
 def real_person_page():
     """Render the real person game page."""
-    return render_template('real_person.html')
+    response = make_response(render_template("real_person.html"))
+    res = cookie_management(request, response)
+    return res
 
 
 @app.route("/statistics")
-
-
 def statistics():
     """Render the statistics page."""
     _id = request.cookies.get("db_object_id", default=None)
     if not _id:
         _id = generate_stats_doc()
     stats = collection.find_one({"_id": ObjectId(_id)}, {"_id": 0})
-    resp = make_response(render_template('statistics.html', stats_data=stats))
-    resp.set_cookie("db_object_id", _id)
-    return resp
+    res = make_response(render_template('statistics.html', stats_data=stats))
+    res.set_cookie("db_object_id", _id)
+    return res
 
 def generate_stats_doc():
     """
@@ -97,7 +100,23 @@ def generate_stats_doc():
     _id = str(collection.insert_one(stats).inserted_id)
     return _id
 
+def cookie_management(req: Request, res: Response):
+    """
+    Sets db_object_id cookie for response.
+    Ensures every route has a properly set cookie.
 
+    Args:
+        req (Request): The request for calling route.
+        resp (Response): The response whose cookie is to be set.
+
+    Returns
+        resp (Response): Response with proper cookie.
+    """
+    _id = req.cookies.get("db_object_id", default=None)
+    if not _id:
+        _id = generate_stats_doc()
+    res.set_cookie("db_object_id", _id)
+    return res
 
 def retry_request(url, files, retries=5, delay=2, timeout=10):
     for attempt in range(retries):
@@ -211,7 +230,7 @@ def play_against_ai():
     stats = collection.find_one({"_id": ObjectId(_id)})
     
     stats = update_player_stats(result, player_choice, _id)
-    
+
     return jsonify({
         "player_name": player_name,
         "player_choice": player_choice,
