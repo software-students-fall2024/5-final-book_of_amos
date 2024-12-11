@@ -211,8 +211,7 @@ def play_against_ai():
     stats = collection.find_one({"_id": ObjectId(_id)})
     
     stats = update_player_stats(result, player_choice, _id)
-    with open('thing.txt','w') as f:
-        f.write(str(db))
+    
     return jsonify({
         "player_name": player_name,
         "player_choice": player_choice,
