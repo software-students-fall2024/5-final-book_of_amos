@@ -28,6 +28,7 @@ from app import (
     player_stats,
     countdown_timer,
     handle_disconnect,
+    cookie_management
 )
 import os
 import json
@@ -91,19 +92,19 @@ def test_home_page(client, mock_mongodb):
     assert response.status_code == 200
 
 
-def test_ai_page(client):
+def test_ai_page(client, mock_mongodb):
     """Test the AI game page route"""
     response = client.get("/ai")
     assert response.status_code == 200
 
 
-def test_ai_ml_page(client):
+def test_ai_ml_page(client, mock_mongodb):
     """Test the AI ML game page route"""
     response = client.get("/ai_machine_learning")
     assert response.status_code == 200
 
 
-def test_real_person_page(client):
+def test_real_person_page(client, mock_mongodb):
     """Test the real person game page route"""
     response = client.get("/real_person")
     assert response.status_code == 200
