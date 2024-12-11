@@ -14,7 +14,7 @@ Our project is a revamping of our project 4 web-app, complete with new modes and
 - [Simon](https://github.com/simesherbs)
 
 ## Instructions
-Simply enter 143.198.0.220 into your browser and play!
+Simply visit http://143.198.0.220/ and play!
 
 ### Small note
 Due to http secuirty issues, to be able to make use of the gesture recognition mode, you need to whitelist the site in your browser. Go "chrome://flags" and and add the IP to the "Insecure origins treated as secure" whitelist.
